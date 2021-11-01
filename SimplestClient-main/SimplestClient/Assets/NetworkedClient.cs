@@ -16,10 +16,17 @@ public class NetworkedClient : MonoBehaviour
     byte error;
     bool isConnected = false;
     int ourClientID;
+    GameObject gameSystemManager;
 
     // Start is called before the first frame update
     void Start()
     {
+        GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+        foreach (GameObject go in allObjects)
+        {
+            if (go.name == "GameManager")
+                gameSystemManager = go;
+        }
         Connect();
     }
 
@@ -105,6 +112,25 @@ public class NetworkedClient : MonoBehaviour
     private void ProcessRecievedMsg(string msg, int id)
     {
         Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
+        string[] csv = msg.Split(',');
+        int signifier = int.Parse(csv[0]);
+
+        if (signifier == ServerToClientSignifiers.LoginResponse)
+        {
+            int loginResultSignifier = int.Parse(csv[1]);
+            if (loginResultSignifier == LoginResponses.Success)
+            {
+                gameSystemManager.GetComponent<GameSysManager>().changeGameState(GameStates.MainMenu);
+            }
+            else if (loginResultSignifier == ServerToClientSignifiers.GameSessionStarted)
+            {
+                gameSystemManager.GetComponent<GameSysManager>().changeGameState(GameStates.PlayingTicTacToe);
+            }
+            else if (signifier == ServerToClientSignifiers.OpponentTicTacToePlay)
+            {
+               
+            }
+        }
     }
 
 
@@ -117,14 +143,26 @@ public class NetworkedClient : MonoBehaviour
     {
         public const int Login = 1;
         public const int CreateAccount = 2;
+        public const int AddToGameSessionQueue = 3;
+        public const int ticTacToePlay = 4;
     }
 
     public static class ServerToClientSignifiers
     {
         public const int LoginResponse = 1;
+        public const int GameSessionStarted = 2;
+        public const int OpponentTicTacToePlay = 3;
         //  public const int LoginFail = 2;
         //public const int CreateAccountSuccess = 3;
         //public const int CreateAccountFailure = 4;
+    }
+
+    public static class LoginResponses
+    {
+        public const int Success = 1;
+        public const int FailureNameInUse = 2;
+        public const int FailureNameNotFound = 3;
+        public const int FailureIncorrectPassword = 4;
     }
 
 

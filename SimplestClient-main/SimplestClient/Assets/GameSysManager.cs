@@ -77,12 +77,13 @@ public class GameSysManager : MonoBehaviour
 
     public void findGameSessionButtonPressed()
     {
-
+        NetworkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.AddToGameSessionQueue + "");
+        changeGameState(GameStates.WaitingForMatch);
     }
 
     public void placeHolderGameButtonPressed()
     {
-
+        NetworkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.ticTacToePlay + "");
     }
 
     public void changeGameState(int newState)
@@ -126,6 +127,9 @@ public static class ClientToServerSignifiers
 {
     public const int Login = 1;
     public const int CreateAccount = 2;
+    public const int AddToGameSessionQueue = 3;
+    public const int ticTacToePlay = 4;
+
 }
 
 public static class ServerToClientSignifiers
